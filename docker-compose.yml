@@ -1,0 +1,12 @@
+services:
+  cryptoGestion:
+    build: .                    
+    image: cryptoimage:latest
+    container_name: gestionCrypto
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "main_api:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
