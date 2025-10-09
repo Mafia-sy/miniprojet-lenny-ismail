@@ -22,7 +22,6 @@ jobs:
       - name: Construire l'image Docker
         run: docker build -t cryptoimage:latest .
 
-<<<<<<< HEAD
       - name: Vérifier la présence de l'image
         run: docker images | grep cryptoimage
 
@@ -36,7 +35,7 @@ jobs:
 
       - name: Installer Docker
         uses: docker/setup-buildx-action@v3
-=======
+      
       - name: Sauvegarder l’image Docker comme artefact
         run: docker save cryptoimage:latest | gzip > cryptoimage.tar.gz
 
@@ -58,7 +57,6 @@ jobs:
 
       - name: Charger l’image Docker
         run: gunzip -c cryptoimage.tar.gz | docker load
->>>>>>> 96e2c456cb755c25b49bd52338068f753f57e6b8
 
       - name: Lancer le conteneur
         run: docker run -d -p 8000:8000 --name crypto_test cryptoimage:latest
