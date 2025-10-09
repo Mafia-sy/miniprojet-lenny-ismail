@@ -22,19 +22,27 @@ jobs:
       - name: Construire l'image Docker
         run: docker build -t cryptoimage:latest .
 
-      - name: Vérifier la présence de l'image
-        run: docker images | grep cryptoimage
+      - name: Sauvegarder l’image Docker comme artefact
+        run: docker save cryptoimage:latest | gzip > cryptoimage.tar.gz
+
+      - name: Upload de l’image
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptoimage
+          path: cryptoimage.tar.gz
 
   # Job 2 : Test de l'API dans un conteneur
   test:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Cloner le code
-        uses: actions/checkout@v4
+      - name: Télécharger l’image Docker depuis le job précédent
+        uses: actions/download-artifact@v4
+        with:
+          name: cryptoimage
 
-      - name: Installer Docker
-        uses: docker/setup-buildx-action@v3
+      - name: Charger l’image Docker
+        run: gunzip -c cryptoimage.tar.gz | docker load
 
       - name: Lancer le conteneur
         run: docker run -d -p 8000:8000 --name crypto_test cryptoimage:latest
@@ -53,4 +61,3 @@ jobs:
         run: |
           docker rm -f $(docker ps -aq) || true
           docker rmi -f cryptoimage:latest || true
-
