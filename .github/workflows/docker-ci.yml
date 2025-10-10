@@ -17,3 +17,4 @@ jobs:
         run: |
           echo "Création d'une image Docker..."
           docker build -t cryptoimage:latest .
+          docker compose up -d .
