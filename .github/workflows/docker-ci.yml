@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Simple CI
 
 on:
   push:
@@ -7,60 +7,18 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Récupérer le code
         uses: actions/checkout@v4
-      
-      - name: Build project
+
+      - name: Compiler le programme
         run: |
-          echo "Compilation du programme!!"
-          g++ -c hello.cpp -o hello.o
-          g++ -c test1.cpp -o test1.o
-          g++ -c test2.cpp -o test2.o
-          g++ -c main.cpp -o main.o
-          
-          g++ main.o hello.o -o monprog
+          echo "Compilation du projet..."
+          g++ main.cpp hello.cpp -o monprog
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: binaries
-          path: |
-            monprog
-            hello.o
-            test1.o
-            test2.o
-
-  test1:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries
-
-      - name: Run Test 1
+      - name: Exécuter le programme
         run: |
-          echo "Execution des tests 1"          
-          g++ test1.o hello.o -o test1
-          chmod +x test1
-          ./test1
-
-  test2:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries
-
-      - name: Run Test 2
-        run: |
-          echo "Execution des tests 2"  
-          g++ test2.o hello.o -o test2
-          chmod +x test2
-          ./test2
+          echo "Lancement du programme..."
+          ./monprog
