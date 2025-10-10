@@ -1,4 +1,4 @@
-name: Simple CI
+name: Simple CI - Build & Test
 
 on:
   push:
@@ -7,18 +7,44 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  # --- Étape 1 : Compilation ---
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Compiler le programme
+      - name: Compilation du projet
         run: |
           echo "Compilation du projet..."
-          g++ main.cpp hello.cpp -o monprog
+          g++ -o monprog main.cpp
+          echo "✅ Compilation terminée avec succès."
 
-      - name: Exécuter le programme
+      - name: Sauvegarde de l’exécutable
+        uses: actions/upload-artifact@v4
+        with:
+          name: monprog
+          path: monprog
+
+  # --- Étape 2 : Test ---
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Télécharger l’exécutable compilé
+        uses: actions/download-artifact@v4
+        with:
+          name: monprog
+
+      - name: Lancer le test simple
         run: |
-          echo "Lancement du programme..."
-          ./monprog
+          echo "Exécution du test..."
+          chmod +x monprog
+          ./monprog > output.txt
+
+          if grep -q "Hello" output.txt; then
+            echo "✅ Test réussi : 'Hello' trouvé dans la sortie"
+          else
+            echo "❌ Test échoué : 'Hello' non trouvé"
+            exit 1
+          fi
