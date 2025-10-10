@@ -1,4 +1,4 @@
-name: Simple CI - Build & Test (Auto Code)
+name: CI Pipeline
 
 on:
   push:
@@ -8,44 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Vérifier ou créer le fichier main.cpp
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build project
         run: |
-          if [ ! -f main.cpp ]; then
-            echo '#include <iostream>' > main.cpp
-            echo 'int main() { std::cout << "Hello CI Test" << std::endl; return 0; }' >> main.cpp
-            echo "Fichier main.cpp créé automatiquement."
-          else
-            echo "Fichier main.cpp trouvé."
-          fi
-
-      - name: Compiler le programme
-        run: |
-          echo "Compilation du projet..."
-          g++ -o monprog main.cpp
-          echo "✅ Compilation terminée avec succès."
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Vérifier ou créer le fichier main.cpp
-        run: |
-          if [ ! -f main.cpp ]; then
-            echo '#include <iostream>' > main.cpp
-            echo 'int main() { std::cout << "Hello CI Test" << std::endl; return 0; }' >> main.cpp
-            echo "Fichier main.cpp créé automatiquement."
-          fi
-
-      - name: Compiler et exécuter le test
-        run: |
-          g++ -o monprog main.cpp
-          ./monprog > sortie.txt
-
-          if grep -q "Hello" sortie.txt; then
-            echo "✅ Test réussi : le programme affiche bien 'Hello'"
-          else
-            echo "❌ Test échoué : la sortie ne contient pas 'Hello'"
-            exit 1
-          fi
+          echo "creation d'une image !!"
+          docker build -t cryptoimage:latest
+          
