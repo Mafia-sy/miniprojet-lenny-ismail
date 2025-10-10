@@ -8,13 +8,12 @@ on:
 
 jobs:
   build:
-    runs-on:ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Build project
         run: |
-          echo "creation d'une image !!"
-          docker build -t cryptoimage:latest
-          
+          echo "Création d'une image Docker..."
+          docker build -t cryptoimage:latest .
