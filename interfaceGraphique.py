@@ -1,23 +1,27 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, simpledialog, messagebox
 import requests
 
-API_URL = "http://192.168.1.102:8000"
+from aesgestion import AesGestion
+from rsagestion import RsaGestion
+
+API_URL = "http://192.168.1.102:8000"  # à adapter selon ton backend
 
 class CryptoGUI:
     def __init__(self, root):
         self.root = root
         root.title("Crypto GUI")
         self.cipher_type = tk.StringVar(value="AES")
-        
-        bg_color = "#C43394"       # Fond
-        fg_color = "#ffffff"       # Texte
-        btn_color = "#444444"      # Boutons
-        btn_text_color = "#ffffff" # Texte des boutons
-        
-        
-        root.configure(bg=bg_color)
 
+        self.aes = AesGestion()
+        self.rsa = RsaGestion()
+
+        bg_color = "#C43394"
+        fg_color = "#ffffff"
+        btn_color = "#444444"
+        btn_text_color = "#ffffff"
+
+        root.configure(bg=bg_color)
 
         # Ligne 0 : Choix entre AES et RSA
         tk.Label(root, text="Méthode de chiffrement :").grid(row=0, column=0, sticky='e')
@@ -26,10 +30,12 @@ class CryptoGUI:
         # Ligne 1 : Charger clé AES
         tk.Label(root, text="Clé AES :").grid(row=1, column=0, sticky='e')
         tk.Button(root, text="Charger", command=self.load_aes_key).grid(row=1, column=1, sticky='w')
+        tk.Button(root, text="Créer Clé AES", command=self.create_aes_key).grid(row=1, column=2, padx=5)
 
         # Ligne 2 : Charger clé RSA
         tk.Label(root, text="Clé RSA :").grid(row=2, column=0, sticky='e')
         tk.Button(root, text="Charger", command=self.load_rsa_keys).grid(row=2, column=1, sticky='w')
+        tk.Button(root, text="Créer Clés RSA", command=self.create_rsa_keys).grid(row=2, column=2, padx=5)
 
         # Ligne 3+ : Actions
         actions = [
@@ -64,7 +70,7 @@ class CryptoGUI:
             res = requests.post(f"{API_URL}/aes/encrypt_string", data={"data": data})
         else:
             res = requests.post(f"{API_URL}/rsa/encrypt", data={"data": data})
-        
+
         messagebox.showinfo("Résultat", res.json().get("encrypted", "Erreur"))
 
     def decrypt_data(self):
@@ -84,6 +90,31 @@ class CryptoGUI:
         if data:
             res = requests.post(f"{API_URL}/hash/sha256", data={"data": data})
             messagebox.showinfo("SHA-256", res.json()["sha256"])
+
+    def create_aes_key(self):
+        self.aes.generate_aes_key()
+        filepath = filedialog.asksaveasfilename(title="Enregistrer la clé AES", defaultextension=".key", filetypes=[("Key files", "*.key")])
+        if filepath:
+            try:
+                self.aes.save_aes_key_to_file(filepath)
+                messagebox.showinfo("Clé AES", "Clé AES générée et enregistrée avec succès.")
+            except Exception as e:
+                messagebox.showerror("Erreur AES", f"Erreur lors de la sauvegarde : {e}")
+
+    def create_rsa_keys(self):
+        taille = simpledialog.askinteger("Taille des clés", "Entrer la taille des clés RSA (ex: 2048):", minvalue=1024, maxvalue=8192)
+        if not taille:
+            return
+
+        fichier_pub = filedialog.asksaveasfilename(title="Enregistrer la clé publique", defaultextension=".pem", filetypes=[("PEM files", "*.pem")])
+        fichier_priv = filedialog.asksaveasfilename(title="Enregistrer la clé privée", defaultextension=".pem", filetypes=[("PEM files", "*.pem")])
+
+        if fichier_pub and fichier_priv:
+            try:
+                self.rsa.generation_clef(fichier_pub, fichier_priv, taille)
+                messagebox.showinfo("Clés RSA", "Clés RSA générées et enregistrées avec succès.")
+            except Exception as e:
+                messagebox.showerror("Erreur RSA", f"Erreur lors de la génération : {e}")
 
 
 if __name__ == "__main__":
